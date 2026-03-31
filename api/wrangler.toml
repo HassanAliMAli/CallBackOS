@@ -1,0 +1,20 @@
+name = "callbackos-api"
+main = "src/index.ts"
+compatibility_date = "2024-03-29"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "callbackos-db"
+database_id = "290b0a15-9740-414c-9a55-59afb4afc5b4"
+
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "callbackos-storage"
+
+[[durable_objects.bindings]]
+name = "CALL_SESSION"
+class_name = "CallSession"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["CallSession"]
