@@ -15,10 +15,28 @@ export class CallSession extends DurableObject {
 
     // Accept webhook chunks from Elevenlabs HTTP requests
     if (request.method === "POST" && url.pathname.endsWith("/chunk")) {
-      const payload = await request.text();
+      const payloadText = await request.text();
+      let normalizedPayload = payloadText;
+      
+      try {
+         const data = JSON.parse(payloadText);
+         // Build normalized chunk
+         const chunk = {
+           type: 'transcript_chunk',
+           source: (data.role === 'user' || data.source === 'user') ? 'user' : 'agent',
+           text: data.message || data.text || data.transcript || ''
+         };
+         // Only broadcast if there's actual text
+         if (chunk.text) {
+           normalizedPayload = JSON.stringify(chunk);
+         }
+      } catch (e) {
+         console.error("Failed to parse webhook chunk for DO broadcast", e);
+      }
+
       // Broadcast to all connected clients
       this.ctx.getWebSockets().forEach(ws => {
-        ws.send(payload);
+        ws.send(normalizedPayload);
       });
       return new Response(JSON.stringify({ status: "chunk_received" }), { 
         status: 200,

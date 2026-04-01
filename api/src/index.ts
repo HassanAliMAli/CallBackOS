@@ -29,6 +29,13 @@ app.post('/api/simulate', async (c) => {
 
   const leadId = crypto.randomUUID();
   
+  // Get business details for the prompt
+  const business = await db.select().from(businesses).where(eq(businesses.id, businessId)).get();
+  
+  if (!business) {
+    return c.json({ success: false, error: "Business not found" }, 404);
+  }
+
   // Create lead
   await db.insert(leads).values({
     id: leadId,
@@ -48,13 +55,25 @@ app.post('/api/simulate', async (c) => {
          "Content-Type": "application/json"
        },
        body: JSON.stringify({
-         phone_number: phone,
-         agent_id: "example-agent-id", // Assume agent is predefined
-         webhook_url: `https://${new URL(c.req.url).host}/api/webhook/elevenlabs/${leadId}`
+         to: phone,
+         agent_id: "agent_9101kn0zrycxfax82yc36d3vpexf", // The specified agent ID
+         webhook_url: `https://${new URL(c.req.url).host}/api/webhook/elevenlabs/${leadId}`,
+         conversation_initiation_client_data: {
+           dynamic_variables: {
+             lead_name: name,
+             business_name: business.name,
+             system_prompt_addon: business.prompt || ""
+           }
+         }
        })
      });
      
      const callData = (await response.json()) as any;
+     
+     if (!response.ok) {
+        console.error("ElevenLabs Error:", callData);
+        throw new Error(JSON.stringify(callData));
+     }
      
      await db.insert(callbackJobs).values({
         id: crypto.randomUUID(),
@@ -85,12 +104,22 @@ app.post('/api/webhook/elevenlabs/:leadId', async (c) => {
   }));
   
   // If call is ended, save transcript and update lead status
-  if (body.type === 'call_ended') {
+  // ElevenLabs uses 'conversation_ended'
+  if (body.type === 'conversation_ended') {
     const db = drizzle(c.env.DB);
+    let transcriptText = 'No transcript';
+    
+    // Parse ElevenLabs transcript array into a single string
+    if (body.transcript && Array.isArray(body.transcript)) {
+      transcriptText = body.transcript.map((msg: any) => `${msg.role}: ${msg.message}`).join('\n');
+    } else if (body.transcript) {
+      transcriptText = JSON.stringify(body.transcript);
+    }
+    
     await db.insert(transcripts).values({
       id: crypto.randomUUID(),
       leadId,
-      content: body.transcript || 'No transcript',
+      content: transcriptText,
       createdAt: new Date()
     });
 
@@ -109,6 +138,29 @@ app.post('/api/webhook/elevenlabs/:leadId', async (c) => {
   }
 
   return c.json({ received: true });
+});
+
+// 2.5 Businesses Endpoints
+// Create business
+app.post('/api/businesses', async (c) => {
+  const db = drizzle(c.env.DB);
+  const body = await c.req.json();
+  const newBusiness = {
+    id: body.id || crypto.randomUUID(),
+    name: body.name,
+    timezone: body.timezone || 'UTC',
+    prompt: body.prompt || '',
+    createdAt: new Date()
+  };
+  await db.insert(businesses).values(newBusiness);
+  return c.json({ success: true, business: newBusiness });
+});
+
+// List businesses
+app.get('/api/businesses', async (c) => {
+  const db = drizzle(c.env.DB);
+  const allBusinesses = await db.select().from(businesses);
+  return c.json(allBusinesses);
 });
 
 // Analytics overview
