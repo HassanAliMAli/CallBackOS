@@ -23,12 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-
-const DEMO_BUSINESSES = [
-  { id: "apex-dental", name: "Apex Dental Care" },
-  { id: "metro-auto", name: "Metro Auto Repair" },
-  { id: "sunrise-yoga", name: "Sunrise Yoga Studio" },
-]
+import { useBusinesses } from "@/lib/stores/business-context"
 
 type CallbackDelay = "immediately" | "30-seconds" | "2-minutes"
 
@@ -51,6 +46,7 @@ export function SimulateCallDialog({
   onOpenChange,
   onSubmit,
 }: SimulateCallDialogProps) {
+  const { businesses } = useBusinesses()
   const [formData, setFormData] = useState<FormData>({
     phoneNumber: "",
     callerName: "",
@@ -105,23 +101,46 @@ export function SimulateCallDialog({
       setPhoneError("Please enter a valid phone number")
       return
     }
+    if (!formData.business) {
+      setPhoneError("Please select a business first")
+      return
+    }
     setPhoneError("")
 
     setIsSubmitting(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
+      const res = await fetch(`${WORKER_URL}/api/simulate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessId: formData.business,
+          name: formData.callerName,
+          phone: formData.phoneNumber,
+          reason: formData.reason,
+        }),
+      })
 
-    setIsSubmitting(false)
-    setIsSuccess(true)
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.error || "Failed to simulate call")
+      }
 
-    // Call the onSubmit callback
-    onSubmit(formData)
+      setIsSubmitting(false)
+      setIsSuccess(true)
 
-    // Close dialog after showing success state
-    setTimeout(() => {
-      onOpenChange(false)
-    }, 2000)
+      // Call the onSubmit callback
+      onSubmit(formData)
+
+      // Close dialog after showing success state
+      setTimeout(() => {
+        onOpenChange(false)
+      }, 2000)
+    } catch (err: any) {
+      setPhoneError(err.message || "Failed to trigger callback")
+      setIsSubmitting(false)
+    }
   }
 
   const handlePhoneChange = (value: string) => {
@@ -196,7 +215,7 @@ export function SimulateCallDialog({
                     <SelectValue placeholder="Select a business" />
                   </SelectTrigger>
                   <SelectContent>
-                    {DEMO_BUSINESSES.map((business) => (
+                    {businesses.map((business) => (
                       <SelectItem key={business.id} value={business.id}>
                         {business.name}
                       </SelectItem>

@@ -1,9 +1,8 @@
 // @MOCK_STORE - Replace with real API when connecting backend
 "use client"
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
 import type { Lead, LeadStatus, LeadOutcome, LeadNote } from "../types"
-import { MOCK_LEADS } from "../mock" // @MOCK_IMPORT
 
 interface LeadContextType {
   leads: Lead[]
@@ -29,9 +28,59 @@ export interface LeadFilters {
 
 const LeadContext = createContext<LeadContextType | undefined>(undefined)
 
+const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
+
 export function LeadProvider({ children }: { children: ReactNode }) {
-  const [leads, setLeads] = useState<Lead[]>(MOCK_LEADS) // @MOCK_IMPORT
+  const [leads, setLeads] = useState<Lead[]>([])
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+
+  const fetchLeads = useCallback(async () => {
+    try {
+      const res = await fetch(`${WORKER_URL}/api/leads`)
+      if (!res.ok) throw new Error("Failed to fetch leads")
+      const data = await res.json()
+      
+      const normalizedLeads: Lead[] = data.map((dbLead: any) => {
+        // Capitalize status
+        const statusMap: Record<string, LeadStatus> = {
+          'calling': 'Calling',
+          'completed': 'Completed',
+          'failed': 'Failed',
+          'escalate': 'Escalate',
+        };
+        const status = statusMap[dbLead.status] || 'Calling';
+        
+        return {
+          id: dbLead.id,
+          businessId: dbLead.businessId,
+          businessName: dbLead.businessName || "Unknown Business",
+          callerNumber: dbLead.phone,
+          callerName: dbLead.name || undefined,
+          status: status as LeadStatus,
+          outcome: "Pending", // Default
+          missedAt: new Date(dbLead.createdAt),
+          notes: [] 
+        }
+      })
+      
+      // Keep existing notes if lead already exists in state
+      setLeads((prevLeads) => {
+        const notesMap = new Map(prevLeads.map(l => [l.id, l.notes]))
+        return normalizedLeads.map(lead => ({
+          ...lead,
+          notes: notesMap.get(lead.id) || []
+        }))
+      })
+    } catch (err) {
+      console.error("Failed to load leads from API", err)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchLeads()
+    const interval = setInterval(fetchLeads, 10000)
+    return () => clearInterval(interval)
+  }, [fetchLeads])
 
   const selectLead = useCallback((lead: Lead | null) => {
     setSelectedLead(lead)

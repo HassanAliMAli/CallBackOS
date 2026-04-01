@@ -179,7 +179,19 @@ app.get('/api/analytics/overview', async (c) => {
 // 3. List leads
 app.get('/api/leads', async (c) => {
   const db = drizzle(c.env.DB);
-  const allLeads = await db.select().from(leads);
+  const allLeads = await db
+    .select({
+      id: leads.id,
+      businessId: leads.businessId,
+      name: leads.name,
+      phone: leads.phone,
+      status: leads.status,
+      createdAt: leads.createdAt,
+      businessName: businesses.name
+    })
+    .from(leads)
+    .leftJoin(businesses, eq(leads.businessId, businesses.id));
+    
   return c.json(allLeads);
 });
 

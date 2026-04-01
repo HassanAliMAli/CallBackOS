@@ -54,11 +54,9 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
           setSelectedBusinessId(realBusinesses[0].id)
         }
       } catch (err) {
-        console.error("Failed to load businesses from API, falling back to mock", err);
-        setBusinesses(MOCK_BUSINESSES);
-        if (MOCK_BUSINESSES.length > 0) {
-          setSelectedBusinessId(MOCK_BUSINESSES[0].id)
-        }
+        console.error("Failed to load businesses from API", err);
+        setBusinesses([]);
+        setSelectedBusinessId(null);
       } finally {
         setIsLoading(false);
       }
