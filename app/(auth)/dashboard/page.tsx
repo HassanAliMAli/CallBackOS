@@ -99,13 +99,14 @@ export default function DashboardPage() {
           status: (d.status.charAt(0).toUpperCase() + d.status.slice(1)) as LeadStatus,
           outcome: (d.status === 'completed' ? 'Booked' : (d.status === 'escalate' ? 'Needs Human' : 'Qualified')) as LeadOutcome,
           missedAt: new Date(d.createdAt),
-          createdAt: new Date(d.createdAt),
-          updatedAt: new Date(d.createdAt),
-          duration: 0,
+          callbackInitiatedAt: null,
+          transcript: null,
+          duration: null,
           callbackAttempt: 1,
           maxAttempts: 3,
+          callbackNumber: null,
           notes: [],
-          transcript: [],
+          aiSummary: null,
           activityLog: []
         }))
         setLeads(mapped.sort((a,b) => b.missedAt.getTime() - a.missedAt.getTime()))

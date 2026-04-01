@@ -59,7 +59,15 @@ export function LeadProvider({ children }: { children: ReactNode }) {
           status: status as LeadStatus,
           outcome: "Pending", // Default
           missedAt: new Date(dbLead.createdAt),
-          notes: [] 
+          callbackInitiatedAt: null,
+          transcript: null,
+          duration: null,
+          callbackAttempt: 1,
+          maxAttempts: 3,
+          callbackNumber: null,
+          notes: [],
+          aiSummary: null,
+          activityLog: []
         }
       })
       
