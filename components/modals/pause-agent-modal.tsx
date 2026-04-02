@@ -20,7 +20,7 @@ export function PauseAgentModal({ open, onClose, businessName }: PauseAgentModal
 
   const handlePause = async () => {
     setIsSubmitting(true)
-    // @MOCK - Simulate API call
+    // TODO: Call PUT /api/businesses/:id/pause with duration
     await new Promise(r => setTimeout(r, 800))
     setIsSubmitting(false)
     onClose()

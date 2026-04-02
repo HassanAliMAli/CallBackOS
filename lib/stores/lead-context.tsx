@@ -1,4 +1,3 @@
-// @MOCK_STORE - Replace with real API when connecting backend
 "use client"
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"

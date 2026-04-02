@@ -23,7 +23,7 @@ export function DeleteBusinessModal({ open, onClose, businessName }: DeleteBusin
   const handleDelete = async () => {
     if (!isMatch) return
     setIsDeleting(true)
-    // @MOCK - Simulate API call
+    // TODO: Call DELETE /api/businesses/:id
     await new Promise(r => setTimeout(r, 1000))
     setIsDeleting(false)
     onClose()

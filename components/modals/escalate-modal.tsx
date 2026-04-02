@@ -18,7 +18,7 @@ export function EscalateModal({ open, onClose, leadId, callerNumber }: EscalateM
 
   const handleEscalate = async () => {
     setIsSubmitting(true)
-    // @MOCK - Simulate API call
+    // TODO: Call PUT /api/leads/:id/escalate
     await new Promise(r => setTimeout(r, 800))
     setIsSubmitting(false)
     onClose()

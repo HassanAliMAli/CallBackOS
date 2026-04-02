@@ -15,35 +15,50 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Hardcoded demo user for hackathon
-const DEMO_USER: User = {
-  id: "hassan-001",
-  name: "Hassan Ali",
-  email: "hassan@callbackos.com",
+// Default user for public app (no authentication)
+const DEFAULT_USER: User = {
+  id: "public-user",
+  name: "CallbackOS User",
+  email: "user@callbackos.com",
   avatar: null,
-  timezone: "Asia/Karachi",
+  timezone: "UTC",
   role: "Admin",
-  plan: "Growth"
+  plan: "Starter"
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(DEMO_USER)
+  const [user, setUser] = useState<User | null>(DEFAULT_USER)
   const [isLoading, setIsLoading] = useState(false)
 
-  const login = useCallback(async (_email: string, _password: string): Promise<boolean> => {
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 800))
-    setUser(DEMO_USER)
-    setIsLoading(false)
-    return true
+    try {
+      // For now, accept any credentials (demo mode)
+      // TODO: Implement real authentication with D1
+      setUser({
+        ...DEFAULT_USER,
+        email: email
+      })
+      return true
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
-  const signup = useCallback(async (_name: string, _email: string, _password: string): Promise<boolean> => {
+  const signup = useCallback(async (name: string, email: string, password: string): Promise<boolean> => {
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 800))
-    setUser(DEMO_USER)
-    setIsLoading(false)
-    return true
+    try {
+      // For now, accept any signup (demo mode)
+      // TODO: Implement real user registration with D1
+      setUser({
+        ...DEFAULT_USER,
+        name,
+        email
+      })
+      return true
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
   const logout = useCallback(() => {

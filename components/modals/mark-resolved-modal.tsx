@@ -23,7 +23,7 @@ export function MarkResolvedModal({ open, onClose, leadId, callerNumber }: MarkR
   const handleResolve = async () => {
     if (!outcome) return
     setIsSubmitting(true)
-    // @MOCK - Simulate API call
+    // TODO: Call PUT /api/leads/:id/resolve with outcome
     await new Promise(r => setTimeout(r, 800))
     setIsSubmitting(false)
     onClose()

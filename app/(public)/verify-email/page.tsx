@@ -61,14 +61,16 @@ export default function VerifyEmailPage() {
       return
     }
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1500)) // @MOCK_DELAY
+    // TODO: Call API to verify email code
+    await new Promise(resolve => setTimeout(resolve, 1500))
     setIsLoading(false)
     router.push("/onboarding")
   }
 
   const handleResend = async () => {
     setResendCooldown(30)
-    await new Promise(resolve => setTimeout(resolve, 500)) // @MOCK_DELAY
+    // TODO: Call API to resend verification email
+    await new Promise(resolve => setTimeout(resolve, 500))
   }
 
   return (
@@ -89,7 +91,7 @@ export default function VerifyEmailPage() {
           <h1 className="text-2xl font-bold tracking-tight">Check your email</h1>
           <p className="text-sm text-muted-foreground mt-2">
             We sent a 6-digit verification code to<br />
-            <span className="font-medium text-foreground">hassan@callbackos.com</span> {/* @MOCK */}
+            <span className="font-medium text-foreground">your email address</span>
           </p>
         </div>
 

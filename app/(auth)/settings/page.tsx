@@ -30,8 +30,9 @@ export default function SettingsPage() {
 
   const save = async () => { 
     setSaving(true)
-    // Update auth context (demo - in production this would call API)
+    // Update user profile in auth context
     updateProfile({ name, email })
+    // TODO: Call API to persist to D1
     await new Promise(r => setTimeout(r, 1000))
     setSaving(false)
   }

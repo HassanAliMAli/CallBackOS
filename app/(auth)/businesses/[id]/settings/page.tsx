@@ -31,7 +31,12 @@ export default function BusinessSettingsPage() {
 
   if (!biz) return <div className="text-center py-20 text-muted-foreground">Business not found</div>
 
-  const save = async () => { setSaving(true); await new Promise(r => setTimeout(r, 1000)); setSaving(false) } // @MOCK_DELAY
+  const save = async () => { 
+    setSaving(true)
+    // TODO: Call PUT /api/businesses/:id to persist changes to D1
+    await new Promise(r => setTimeout(r, 1000))
+    setSaving(false)
+  }
 
   const updateDay = (day: keyof OperatingHours, field: keyof DaySchedule, value: string | boolean) => {
     updateBusiness(biz.id, { hours: { ...biz.hours, [day]: { ...biz.hours[day], [field]: value } } })

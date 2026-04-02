@@ -64,7 +64,7 @@ export default function LandingPage() {
           <div className="container px-4 md:px-6 text-center">
             <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-8">Trusted by 1000+ local businesses</p>
             <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale">
-              {/* @MOCK placeholders for logos */}
+              {/* Placeholder logos */}
               {["Acme Corp", "GlobalTech", "Local Dental", "AutoFix", "Prime Plumbers", "Elite Legal"].map((logo) => (
                 <div key={logo} className="font-bold text-xl md:text-2xl font-mono tracking-tighter text-foreground/80 flex items-center gap-2">
                   <div className="w-6 h-6 rounded-md bg-foreground/20" /> {logo}

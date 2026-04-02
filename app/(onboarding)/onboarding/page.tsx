@@ -126,13 +126,13 @@ export default function OnboardingPage() {
       
       const data = await response.json()
       console.log("Business created:", data.businessId)
-      
+
       setIsLoading(false)
       setIsComplete(true)
     } catch (error) {
       console.error("Onboarding error:", error)
       setIsLoading(false)
-      // Still show success for demo purposes
+      // Show success screen even on error (for demo)
       setIsComplete(true)
     }
   }

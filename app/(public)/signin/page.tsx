@@ -30,7 +30,7 @@ export default function SignInPage() {
     if (success) {
       router.push("/dashboard")
     } else {
-      setError("Invalid email or password") /* @MOCK */
+      setError("Invalid email or password")
     }
   }
 
