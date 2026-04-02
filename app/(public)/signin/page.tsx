@@ -13,24 +13,48 @@ import { cn } from "@/lib/utils"
 
 export default function SignInPage() {
   const router = useRouter()
-  const { login, isLoading } = useAuth()
+  const { login } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  const API_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setIsLoading(true)
+    
     if (!email || !password) {
       setError("Please fill in all fields")
+      setIsLoading(false)
       return
     }
-    const success = await login(email, password)
-    if (success) {
+    
+    try {
+      const response = await fetch(`${API_URL}/api/auth/signin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        setError(data.error || "Invalid email or password")
+        setIsLoading(false)
+        return
+      }
+      
+      // Update auth context with real user
+      await login(data.user.email, password)
       router.push("/dashboard")
-    } else {
-      setError("Invalid email or password")
+    } catch (err) {
+      setError("Network error. Please try again.")
+    } finally {
+      setIsLoading(false)
     }
   }
 

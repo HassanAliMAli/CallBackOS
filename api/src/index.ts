@@ -424,6 +424,95 @@ app.put('/api/users/:id', async (c) => {
   return c.json({ success: true, user: updated });
 });
 
+// 12. Sign up - create new user
+app.post('/api/auth/signup', async (c) => {
+  const db = drizzle(c.env.DB);
+  const body = await c.req.json();
+  const { name, email, password } = body;
+  
+  if (!name || !email || !password) {
+    return c.json({ error: "Name, email, and password are required" }, 400);
+  }
+  
+  // Check if user already exists
+  const existing = await db.select().from(users).where(eq(users.email, email)).get();
+  if (existing) {
+    return c.json({ error: "Email already registered" }, 409);
+  }
+  
+  // Hash password (simple hash - use bcrypt in production)
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const passwordHash = Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  
+  const userId = crypto.randomUUID();
+  const now = new Date();
+  
+  const newUser = {
+    id: userId,
+    name,
+    email,
+    passwordHash,
+    timezone: 'UTC',
+    role: 'admin',
+    plan: 'starter',
+    avatar: null,
+    createdAt: now,
+    updatedAt: now
+  };
+  
+  await db.insert(users).values(newUser);
+  
+  return c.json({ 
+    success: true, 
+    user: { id: userId, name, email, timezone: 'UTC', role: 'admin', plan: 'starter' }
+  });
+});
+
+// 13. Sign in - authenticate user
+app.post('/api/auth/signin', async (c) => {
+  const db = drizzle(c.env.DB);
+  const body = await c.req.json();
+  const { email, password } = body;
+  
+  if (!email || !password) {
+    return c.json({ error: "Email and password are required" }, 400);
+  }
+  
+  const user = await db.select().from(users).where(eq(users.email, email)).get();
+  if (!user) {
+    return c.json({ error: "Invalid email or password" }, 401);
+  }
+  
+  // Hash password and compare
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const passwordHash = Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  
+  if (passwordHash !== user.passwordHash) {
+    return c.json({ error: "Invalid email or password" }, 401);
+  }
+  
+  return c.json({ 
+    success: true, 
+    user: { 
+      id: user.id, 
+      name: user.name, 
+      email: user.email, 
+      timezone: user.timezone, 
+      role: user.role, 
+      plan: user.plan,
+      avatar: user.avatar
+    }
+  });
+});
+
 // 5. Connect to Websocket for a lead (Real-time tracking)
 app.get('/api/calls/:leadId/live', async (c) => {
   const leadId = c.req.param('leadId');
