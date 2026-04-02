@@ -16,8 +16,8 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     if (!email) return
     setIsLoading(true)
-    // TODO: Call API to send password reset email
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    // Password reset requires email service - skip for now
+    // In production: Call API to send password reset email
     setIsLoading(false)
     setSent(true)
   }

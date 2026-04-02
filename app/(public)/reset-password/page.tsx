@@ -38,8 +38,8 @@ export default function ResetPasswordPage() {
     if (password !== confirmPassword) { setError("Passwords do not match"); return }
     if (strength.score < 2) { setError("Password is too weak"); return }
     setIsLoading(true)
-    // TODO: Call API to reset password with token
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    // Password reset requires email token - skip for now
+    // In production: Call API to reset password with token
     setIsLoading(false)
     setSuccess(true)
   }

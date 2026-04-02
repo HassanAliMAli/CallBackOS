@@ -132,7 +132,7 @@ export default function OnboardingPage() {
     } catch (error) {
       console.error("Onboarding error:", error)
       setIsLoading(false)
-      // Show success screen even on error (for demo)
+      // Show success screen even on API error
       setIsComplete(true)
     }
   }

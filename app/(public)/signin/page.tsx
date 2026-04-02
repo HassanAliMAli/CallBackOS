@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
 
 export default function SignInPage() {
   const router = useRouter()
-  const { login } = useAuth()
+  const { login, setUser } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -48,7 +48,8 @@ export default function SignInPage() {
         return
       }
       
-      // Update auth context with real user
+      // Set user in auth context
+      setUser(data.user)
       await login(data.user.email, password)
       router.push("/dashboard")
     } catch (err) {

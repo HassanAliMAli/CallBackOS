@@ -26,7 +26,7 @@ function getPasswordStrength(password: string): { score: number; label: string; 
 
 export default function SignUpPage() {
   const router = useRouter()
-  const { signup } = useAuth()
+  const { signup, setUser } = useAuth()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -76,7 +76,8 @@ export default function SignUpPage() {
         return
       }
       
-      // Update auth context with real user
+      // Set user in auth context and redirect to onboarding
+      setUser(data.user)
       await signup(data.user.name, data.user.email, password)
       router.push("/onboarding")
     } catch (err) {

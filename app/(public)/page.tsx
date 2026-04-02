@@ -49,9 +49,9 @@ export default function LandingPage() {
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="#demo">
+              <Link href="#how-it-works">
                 <Button size="lg" variant="outline" className="h-12 px-8 text-base bg-background/50 backdrop-blur-sm">
-                  Listen to a Demo
+                  See How It Works
                 </Button>
               </Link>
             </div>

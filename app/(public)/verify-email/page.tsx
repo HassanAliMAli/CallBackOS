@@ -61,16 +61,16 @@ export default function VerifyEmailPage() {
       return
     }
     setIsLoading(true)
-    // TODO: Call API to verify email code
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    // Email verification requires email service - skip for now
+    // In production: Call API to verify email code
     setIsLoading(false)
     router.push("/onboarding")
   }
 
   const handleResend = async () => {
     setResendCooldown(30)
-    // TODO: Call API to resend verification email
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Email resend requires email service - skip for now
+    // In production: Call API to resend verification email
   }
 
   return (

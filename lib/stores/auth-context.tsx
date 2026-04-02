@@ -11,34 +11,20 @@ interface AuthContextType {
   signup: (name: string, email: string, password: string) => Promise<boolean>
   logout: () => void
   updateProfile: (updates: Partial<User>) => void
+  setUser: (user: User | null) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Default user for public app (no authentication)
-const DEFAULT_USER: User = {
-  id: "public-user",
-  name: "CallbackOS User",
-  email: "user@callbackos.com",
-  avatar: null,
-  timezone: "UTC",
-  role: "Admin",
-  plan: "Starter"
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(DEFAULT_USER)
+  const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true)
     try {
-      // For now, accept any credentials (demo mode)
-      // TODO: Implement real authentication with D1
-      setUser({
-        ...DEFAULT_USER,
-        email: email
-      })
+      // User authenticated via API - user state set by signin page
+      // This is called after successful API response
       return true
     } finally {
       setIsLoading(false)
@@ -48,13 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = useCallback(async (name: string, email: string, password: string): Promise<boolean> => {
     setIsLoading(true)
     try {
-      // For now, accept any signup (demo mode)
-      // TODO: Implement real user registration with D1
-      setUser({
-        ...DEFAULT_USER,
-        name,
-        email
-      })
+      // User registered via API - user state set by signup page
+      // This is called after successful API response
       return true
     } finally {
       setIsLoading(false)
@@ -69,6 +50,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(prev => prev ? { ...prev, ...updates } : null)
   }, [])
 
+  const setUserCallback = useCallback((newUser: User | null) => {
+    setUser(newUser)
+  }, [])
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -78,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signup,
       logout,
       updateProfile,
+      setUser: setUserCallback,
     }}>
       {children}
     </AuthContext.Provider>
