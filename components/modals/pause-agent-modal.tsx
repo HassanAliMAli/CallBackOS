@@ -11,21 +11,29 @@ import { LoadingButton } from "@/components/states/loading-button"
 interface PauseAgentModalProps {
   open: boolean
   onClose: () => void
+  businessId: string
   businessName: string
 }
 
-export function PauseAgentModal({ open, onClose, businessName }: PauseAgentModalProps) {
+export function PauseAgentModal({ open, onClose, businessId, businessName }: PauseAgentModalProps) {
   const [duration, setDuration] = useState("until-manual")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const API_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
 
   const handlePause = async () => {
     setIsSubmitting(true)
-    // TODO: Implement business pause/resume in D1
-    // For now, just close the modal
-    await new Promise(r => setTimeout(r, 800))
-    setIsSubmitting(false)
-    onClose()
+    try {
+      await fetch(`${API_URL}/api/businesses/${businessId}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Paused", duration })
+      })
+    } catch (error) {
+      console.error("Failed to pause business", error)
+    } finally {
+      setIsSubmitting(false)
+      onClose()
+    }
   }
 
   return (

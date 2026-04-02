@@ -11,10 +11,11 @@ import { LoadingButton } from "@/components/states/loading-button"
 interface DeleteBusinessModalProps {
   open: boolean
   onClose: () => void
+  businessId: string
   businessName: string
 }
 
-export function DeleteBusinessModal({ open, onClose, businessName }: DeleteBusinessModalProps) {
+export function DeleteBusinessModal({ open, onClose, businessId, businessName }: DeleteBusinessModalProps) {
   const [confirmation, setConfirmation] = useState("")
   const [isDeleting, setIsDeleting] = useState(false)
   const API_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
@@ -25,9 +26,10 @@ export function DeleteBusinessModal({ open, onClose, businessName }: DeleteBusin
     if (!isMatch) return
     setIsDeleting(true)
     try {
-      // TODO: Get business ID from props and call DELETE /api/businesses/:id
-      // For now, just close the modal
-      await new Promise(r => setTimeout(r, 1000))
+      await fetch(`${API_URL}/api/businesses/${businessId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
+      })
     } catch (error) {
       console.error("Failed to delete business", error)
     } finally {

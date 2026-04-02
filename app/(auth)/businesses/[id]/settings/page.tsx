@@ -147,16 +147,18 @@ export default function BusinessSettingsPage() {
         </TabsContent>
       </Tabs>
 
-      <PauseAgentModal 
-        open={openPauseModal} 
-        onClose={() => setOpenPauseModal(false)} 
-        businessName={biz.name} 
+      <PauseAgentModal
+        open={openPauseModal}
+        onClose={() => setOpenPauseModal(false)}
+        businessId={biz.id}
+        businessName={biz.name}
       />
 
-      <DeleteBusinessModal 
-        open={openDeleteModal} 
-        onClose={() => setOpenDeleteModal(false)} 
-        businessName={biz.name} 
+      <DeleteBusinessModal
+        open={openDeleteModal}
+        onClose={() => setOpenDeleteModal(false)}
+        businessId={biz.id}
+        businessName={biz.name}
       />
     </div>
   )

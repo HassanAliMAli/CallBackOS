@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { drizzle } from 'drizzle-orm/d1';
 import { eq } from 'drizzle-orm';
-import { businesses, leads, callbackJobs, transcripts, activityLogs } from './db/schema';
+import { users, businesses, leads, callbackJobs, transcripts, activityLogs } from './db/schema';
 import { CallSession } from './durable-objects/CallSession';
 
 export { CallSession };
@@ -390,6 +390,38 @@ app.put('/api/businesses/:id/faqs', async (c) => {
   await db.update(businesses).set({ prompt: newPrompt }).where(eq(businesses.id, businessId));
   
   return c.json({ success: true });
+});
+
+// 10. Get user profile
+app.get('/api/users/:id', async (c) => {
+  const db = drizzle(c.env.DB);
+  const userId = c.req.param('id');
+  
+  const user = await db.select().from(users).where(eq(users.id, userId)).get();
+  if (!user) {
+    return c.json({ error: "User not found" }, 404);
+  }
+  
+  return c.json(user);
+});
+
+// 11. Update user profile
+app.put('/api/users/:id', async (c) => {
+  const db = drizzle(c.env.DB);
+  const userId = c.req.param('id');
+  const body = await c.req.json();
+  
+  const updates: any = {};
+  if (body.name !== undefined) updates.name = body.name;
+  if (body.email !== undefined) updates.email = body.email;
+  if (body.timezone !== undefined) updates.timezone = body.timezone;
+  if (body.avatar !== undefined) updates.avatar = body.avatar;
+  updates.updatedAt = new Date();
+  
+  await db.update(users).set(updates).where(eq(users.id, userId));
+  
+  const updated = await db.select().from(users).where(eq(users.id, userId)).get();
+  return c.json({ success: true, user: updated });
 });
 
 // 5. Connect to Websocket for a lead (Real-time tracking)

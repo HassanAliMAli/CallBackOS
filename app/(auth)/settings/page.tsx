@@ -28,13 +28,23 @@ export default function SettingsPage() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [inviteEmail, setInviteEmail] = useState("")
 
-  const save = async () => { 
+  const save = async () => {
     setSaving(true)
-    // Update user profile in auth context
-    updateProfile({ name, email })
-    // TODO: Call API to persist to D1
-    await new Promise(r => setTimeout(r, 1000))
-    setSaving(false)
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
+      // Update user profile via API
+      await fetch(`${API_URL}/api/users/${user?.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email })
+      })
+      // Update local context
+      updateProfile({ name, email })
+    } catch (error) {
+      console.error("Failed to save profile", error)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const copyKey = (key: string) => { navigator.clipboard.writeText(key); setCopiedKey(key); setTimeout(() => setCopiedKey(null), 2000) }
