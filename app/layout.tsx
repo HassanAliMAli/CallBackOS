@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
 import { AuthProvider } from '@/lib/stores/auth-context'
 import { BusinessProvider } from '@/lib/stores/business-context'
 import { LeadProvider } from '@/lib/stores/lead-context'
@@ -8,7 +7,7 @@ import { NotificationProvider } from '@/lib/stores/notification-context'
 import { SidebarProvider } from '@/lib/stores/sidebar-context'
 import './globals.css'
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter"
 });
@@ -55,7 +54,6 @@ export default function RootLayout({
             </LeadProvider>
           </BusinessProvider>
         </AuthProvider>
-        <Analytics />
       </body>
     </html>
   )
