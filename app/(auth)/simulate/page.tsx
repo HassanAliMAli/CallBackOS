@@ -86,7 +86,7 @@ export default function SimulatePage() {
       
       // Real call is happening via ElevenLabs natively on the phone. 
       // The transcript isn't simulated here locally anymore, it streams over WS to the Lead Panel instead!
-      setMessages([{ id: 1, speaker: "Agent", message: "The outbound call has been dispatched via ElevenLabs. Answer your phone! View live transcript in the Leads dashboard.", timestamp: new Date() }])
+      setMessages([{ id: 1, speaker: "Agent", message: "Call dispatched via ElevenLabs! Answer your phone. Or use the widget (bottom-right) to demo a live browser call with Aria now. View transcript in Leads dashboard.", timestamp: new Date() }])
       
       await new Promise(r => setTimeout(r, 5000))
       setSimStep("completed")
@@ -219,7 +219,7 @@ export default function SimulatePage() {
         <div className="rounded-lg border border-border bg-card p-5 space-y-4 animate-slide-up-fade">
           <h3 className="text-sm font-semibold flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" />AI Summary</h3>
           <p className="text-sm text-muted-foreground">
-            Call dispatched successfully. Check the <strong>Leads dashboard</strong> for the live transcript and AI-generated summary once the call completes.
+            Call dispatched! Check the <strong>Leads dashboard</strong> for the live transcript and AI-generated summary once the call completes.
           </p>
           <div className="grid sm:grid-cols-3 gap-2 pt-2">
             <div className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/50">
