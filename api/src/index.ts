@@ -56,7 +56,7 @@ app.post('/api/simulate', async (c) => {
        },
        body: JSON.stringify({
          to: phone,
-         agent_id: "agent_9101kn0zrycxfax82yc36d3vpexf", // The specified agent ID
+         agent_id: "agent_8701kn0wrgbcfnnvx34j0rdqc4xv", // The specified agent ID
          webhook_url: `https://${new URL(c.req.url).host}/api/webhook/elevenlabs/${leadId}`,
          conversation_initiation_client_data: {
            dynamic_variables: {
