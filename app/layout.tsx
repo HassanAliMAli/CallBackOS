@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { AuthProvider } from '@/lib/stores/auth-context'
 import { BusinessProvider } from '@/lib/stores/business-context'
 import { LeadProvider } from '@/lib/stores/lead-context'
 import { NotificationProvider } from '@/lib/stores/notification-context'
@@ -43,16 +44,18 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <BusinessProvider>
-          <LeadProvider>
-            <NotificationProvider>
-              <SidebarProvider>
-                {children}
-                <ElevenLabsWidget />
-              </SidebarProvider>
-            </NotificationProvider>
-          </LeadProvider>
-        </BusinessProvider>
+        <AuthProvider>
+          <BusinessProvider>
+            <LeadProvider>
+              <NotificationProvider>
+                <SidebarProvider>
+                  {children}
+                  <ElevenLabsWidget />
+                </SidebarProvider>
+              </NotificationProvider>
+            </LeadProvider>
+          </BusinessProvider>
+        </AuthProvider>
       </body>
     </html>
   )
