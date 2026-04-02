@@ -48,7 +48,7 @@ export default function RootLayout({
             <LeadProvider>
               <NotificationProvider>
                 <SidebarProvider>
-                  {children}
+                  {children}         <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>         <elevenlabs-convai agent-id="agent_8701kn0wrgbcfnnvx34j0rdqc4xv"></elevenlabs-convai>
                 </SidebarProvider>
               </NotificationProvider>
             </LeadProvider>
