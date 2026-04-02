@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LoadingButton } from "@/components/states/loading-button"
 import { useBusinesses } from "@/lib/stores/business-context"
-import { MOCK_KB_FILES, MOCK_FAQS, MOCK_CUSTOM_INSTRUCTIONS } from "@/lib/mock" // @MOCK_IMPORT
 import type { KBFile, FAQ } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -37,9 +36,10 @@ export default function KnowledgeBasePage() {
   const biz = businesses.find(b => b.id === params.id)
   const [saving, setSaving] = useState(false)
 
-  const files = MOCK_KB_FILES[params.id as string] ?? [] // @MOCK_IMPORT
-  const [faqs, setFaqs] = useState<FAQ[]>(MOCK_FAQS[params.id as string] ?? []) // @MOCK_IMPORT
-  const [instructions, setInstructions] = useState(MOCK_CUSTOM_INSTRUCTIONS[params.id as string] ?? "") // @MOCK_IMPORT
+  // Empty arrays - no mock data
+  const files: KBFile[] = []
+  const [faqs, setFaqs] = useState<FAQ[]>([])
+  const [instructions, setInstructions] = useState("")
 
   const addFaq = () => setFaqs(prev => [...prev, { id: `faq_new_${Date.now()}`, question: "", answer: "", businessId: params.id as string }])
   const removeFaq = (id: string) => setFaqs(prev => prev.filter(f => f.id !== id))

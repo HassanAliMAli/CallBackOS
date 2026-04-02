@@ -1,9 +1,7 @@
-// @MOCK_STORE - Replace with real API when connecting backend
 "use client"
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
 import type { Notification } from "../types"
-import { MOCK_NOTIFICATIONS } from "../mock" // @MOCK_IMPORT
 
 interface NotificationContextType {
   notifications: Notification[]
@@ -17,7 +15,7 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS) // @MOCK_IMPORT
+  const [notifications, setNotifications] = useState<Notification[]>([])
 
   const unreadCount = notifications.filter(n => !n.read).length
 

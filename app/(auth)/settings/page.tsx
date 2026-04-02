@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LoadingButton } from "@/components/states/loading-button"
 import { useAuth } from "@/lib/stores/auth-context"
-import { MOCK_TEAM_MEMBERS, MOCK_INVOICES, MOCK_API_KEYS } from "@/lib/mock" // @MOCK_IMPORT
 import { PLAN_TIERS } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 
@@ -29,14 +28,15 @@ export default function SettingsPage() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [inviteEmail, setInviteEmail] = useState("")
 
-  const save = async () => { setSaving(true); await new Promise(r => setTimeout(r, 1000)); setSaving(false) } // @MOCK_DELAY
+  const save = async () => { setSaving(true); await new Promise(r => setTimeout(r, 1000)); setSaving(false) }
 
   const copyKey = (key: string) => { navigator.clipboard.writeText(key); setCopiedKey(key); setTimeout(() => setCopiedKey(null), 2000) }
 
-  const team = MOCK_TEAM_MEMBERS // @MOCK
-  const invoices = MOCK_INVOICES // @MOCK
-  const apiKeys = MOCK_API_KEYS // @MOCK
-  const currentPlan = PLAN_TIERS[1] // @MOCK — Growth plan
+  // Empty arrays - no mock data
+  const team: any[] = []
+  const invoices: any[] = []
+  const apiKeys: any[] = []
+  const currentPlan = PLAN_TIERS[1] // Growth plan
 
   return (
     <div>
@@ -90,42 +90,64 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-3">
             <h3 className="font-semibold">Invoices</h3>
-            <div className="rounded-lg border border-border bg-card overflow-hidden">
-              <Table><TableHeader><TableRow className="hover:bg-transparent border-border"><TableHead className="text-xs">Date</TableHead><TableHead className="text-xs">Amount</TableHead><TableHead className="text-xs">Status</TableHead><TableHead className="text-xs w-[80px]"></TableHead></TableRow></TableHeader>
-              <TableBody>{invoices.map(inv => (
-                <TableRow key={inv.id} className="border-border">
-                  <TableCell className="text-sm">{inv.date.toLocaleDateString()}</TableCell>
-                  <TableCell className="text-sm font-medium tabular-nums">${inv.amount}</TableCell>
-                  <TableCell><Badge variant="secondary" className={cn("text-xs", inv.status === "Paid" ? "bg-status-completed/10 text-status-completed" : "bg-status-calling/10 text-status-calling")}>{inv.status}</Badge></TableCell>
-                  <TableCell><Button variant="ghost" size="sm" className="h-7 text-xs gap-1"><Download className="w-3 h-3" />PDF</Button></TableCell>
-                </TableRow>
-              ))}</TableBody></Table>
-            </div>
+            {invoices.length === 0 ? (
+              <div className="rounded-lg border border-border bg-card p-8 text-center">
+                <CreditCard className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                <h4 className="font-semibold mb-1">No invoices yet</h4>
+                <p className="text-sm text-muted-foreground">Your billing history will appear here</p>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-border bg-card overflow-hidden">
+                <Table><TableHeader><TableRow className="hover:bg-transparent border-border"><TableHead className="text-xs">Date</TableHead><TableHead className="text-xs">Amount</TableHead><TableHead className="text-xs">Status</TableHead><TableHead className="text-xs w-[80px]"></TableHead></TableRow></TableHeader>
+                <TableBody>{invoices.map(inv => (
+                  <TableRow key={inv.id} className="border-border">
+                    <TableCell className="text-sm">{inv.date.toLocaleDateString()}</TableCell>
+                    <TableCell className="text-sm font-medium tabular-nums">${inv.amount}</TableCell>
+                    <TableCell><Badge variant="secondary" className={cn("text-xs", inv.status === "Paid" ? "bg-status-completed/10 text-status-completed" : "bg-status-calling/10 text-status-calling")}>{inv.status}</Badge></TableCell>
+                    <TableCell><Button variant="ghost" size="sm" className="h-7 text-xs gap-1"><Download className="w-3 h-3" />PDF</Button></TableCell>
+                  </TableRow>
+                ))}</TableBody></Table>
+              </div>
+            )}
           </div>
         </TabsContent>
 
         {/* Team */}
         <TabsContent value="team" className="mt-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">Team Members ({team.length})</h3>
+            <h3 className="font-semibold">Team Members</h3>
           </div>
-          <div className="flex items-center gap-2 max-w-md">
-            <Input placeholder="Email address" type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
-            <Button size="sm" className="gap-1 shrink-0"><Plus className="w-3.5 h-3.5" />Invite</Button>
-          </div>
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <Table><TableHeader><TableRow className="hover:bg-transparent border-border"><TableHead className="text-xs">Member</TableHead><TableHead className="text-xs">Role</TableHead><TableHead className="text-xs">Status</TableHead><TableHead className="text-xs w-[60px]"></TableHead></TableRow></TableHeader>
-            <TableBody>{team.map(member => (
-              <TableRow key={member.id} className="border-border">
-                <TableCell>
-                  <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">{member.name.charAt(0)}</div><div><p className="text-sm font-medium">{member.name}</p><p className="text-xs text-muted-foreground">{member.email}</p></div></div>
-                </TableCell>
-                <TableCell><Badge variant="outline" className="text-xs">{member.role}</Badge></TableCell>
-                <TableCell><Badge variant="secondary" className={cn("text-xs", member.status === "Active" ? "bg-status-completed/10 text-status-completed" : "bg-status-calling/10 text-status-calling")}>{member.status}</Badge></TableCell>
-                <TableCell>{member.role !== "Admin" && <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></Button>}</TableCell>
-              </TableRow>
-            ))}</TableBody></Table>
-          </div>
+          {team.length === 0 ? (
+            <div className="rounded-lg border border-border bg-card p-8 text-center">
+              <Users className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <h4 className="font-semibold mb-1">No team members yet</h4>
+              <p className="text-sm text-muted-foreground mb-4">Invite your team to collaborate on CallbackOS</p>
+              <div className="flex items-center gap-2 max-w-md mx-auto">
+                <Input placeholder="Email address" type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} className="max-w-[200px]" />
+                <Button size="sm" className="gap-1 shrink-0"><Plus className="w-3.5 h-3.5" />Invite</Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 max-w-md">
+                <Input placeholder="Email address" type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
+                <Button size="sm" className="gap-1 shrink-0"><Plus className="w-3.5 h-3.5" />Invite</Button>
+              </div>
+              <div className="rounded-lg border border-border bg-card overflow-hidden">
+                <Table><TableHeader><TableRow className="hover:bg-transparent border-border"><TableHead className="text-xs">Member</TableHead><TableHead className="text-xs">Role</TableHead><TableHead className="text-xs">Status</TableHead><TableHead className="text-xs w-[60px]"></TableHead></TableRow></TableHeader>
+                <TableBody>{team.map(member => (
+                  <TableRow key={member.id} className="border-border">
+                    <TableCell>
+                      <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">{member.name.charAt(0)}</div><div><p className="text-sm font-medium">{member.name}</p><p className="text-xs text-muted-foreground">{member.email}</p></div></div>
+                    </TableCell>
+                    <TableCell><Badge variant="outline" className="text-xs">{member.role}</Badge></TableCell>
+                    <TableCell><Badge variant="secondary" className={cn("text-xs", member.status === "Active" ? "bg-status-completed/10 text-status-completed" : "bg-status-calling/10 text-status-calling")}>{member.status}</Badge></TableCell>
+                    <TableCell>{member.role !== "Admin" && <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></Button>}</TableCell>
+                  </TableRow>
+                ))}</TableBody></Table>
+              </div>
+            </>
+          )}
         </TabsContent>
 
         {/* API Keys */}
@@ -134,24 +156,32 @@ export default function SettingsPage() {
             <div><h3 className="font-semibold">API Keys</h3><p className="text-sm text-muted-foreground mt-0.5">Manage your API keys for integration</p></div>
             <Button size="sm" className="gap-1.5"><Plus className="w-3.5 h-3.5" />Generate Key</Button>
           </div>
-          <div className="space-y-3">
-            {apiKeys.map(key => (
-              <div key={key.id} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card">
-                <div className="space-y-1 min-w-0 flex-1 mr-4">
-                  <div className="flex items-center gap-2"><p className="text-sm font-medium">{key.name}</p></div>
-                  <p className="text-xs text-muted-foreground font-mono truncate">{key.key ?? "Hidden"}</p>
-                  <p className="text-[10px] text-muted-foreground">Created {key.createdAt.toLocaleDateString()} · Last used {key.lastUsed?.toLocaleDateString() ?? "Never"}</p>
+          {apiKeys.length === 0 ? (
+            <div className="rounded-lg border border-border bg-card p-8 text-center">
+              <Key className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <h4 className="font-semibold mb-1">No API keys yet</h4>
+              <p className="text-sm text-muted-foreground">Generate an API key to integrate with external services</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {apiKeys.map(key => (
+                <div key={key.id} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card">
+                  <div className="space-y-1 min-w-0 flex-1 mr-4">
+                    <div className="flex items-center gap-2"><p className="text-sm font-medium">{key.name}</p></div>
+                    <p className="text-xs text-muted-foreground font-mono truncate">{key.key ?? "Hidden"}</p>
+                    <p className="text-[10px] text-muted-foreground">Created {key.createdAt.toLocaleDateString()} · Last used {key.lastUsed?.toLocaleDateString() ?? "Never"}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Button variant="ghost" size="icon-sm" onClick={() => copyKey(key.key ?? "")} className="text-muted-foreground">
+                      {copiedKey === key.key ? <Check className="w-3.5 h-3.5 text-status-completed" /> : <Copy className="w-3.5 h-3.5" />}
+                    </Button>
+                    <Button variant="ghost" size="icon-sm" className="text-muted-foreground"><RefreshCw className="w-3.5 h-3.5" /></Button>
+                    <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></Button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <Button variant="ghost" size="icon-sm" onClick={() => copyKey(key.key ?? "")} className="text-muted-foreground">
-                    {copiedKey === key.key ? <Check className="w-3.5 h-3.5 text-status-completed" /> : <Copy className="w-3.5 h-3.5" />}
-                  </Button>
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground"><RefreshCw className="w-3.5 h-3.5" /></Button>
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></Button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

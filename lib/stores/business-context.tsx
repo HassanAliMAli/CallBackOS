@@ -1,9 +1,7 @@
-// @MOCK_STORE - Replace with real API when connecting backend
 "use client"
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
 import type { Business } from "../types"
-import { MOCK_BUSINESSES } from "../mock"
 
 interface BusinessContextType {
   businesses: Business[]
@@ -32,24 +30,55 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
       try {
         const response = await fetch(`${WORKER_URL}/api/businesses`);
         if (!response.ok) throw new Error("Failed to fetch businesses");
-        
-        const data = await response.json() as any[];
-        const template = MOCK_BUSINESSES[0]; // Used to fill missing frontend fields
 
+        const data = await response.json() as any[];
+
+        // Map API response to Business type without mock template
         const realBusinesses = data.map(dbBiz => ({
-          ...template, // Provide mock config for hours, agentConfig, etc.
           id: dbBiz.id,
           name: dbBiz.name,
-          timezone: dbBiz.timezone,
-          // Store raw prompt in agentConfig.greeting temporarily for demo
-          agentConfig: {
-             ...template.agentConfig,
-             greeting: dbBiz.prompt || template.agentConfig.greeting
-          }
+          timezone: dbBiz.timezone || "UTC",
+          // Compute stats as zeros (will be computed from real leads later)
+          stats: { leadsToday: 0, callbacksMade: 0, answerRate: 0 },
+          // Default operating hours (9-5, Mon-Fri)
+          hours: {
+            monday: { isClosed: false, openTime: "09:00", closeTime: "17:00" },
+            tuesday: { isClosed: false, openTime: "09:00", closeTime: "17:00" },
+            wednesday: { isClosed: false, openTime: "09:00", closeTime: "17:00" },
+            thursday: { isClosed: false, openTime: "09:00", closeTime: "17:00" },
+            friday: { isClosed: false, openTime: "09:00", closeTime: "17:00" },
+            saturday: { isClosed: true, openTime: "00:00", closeTime: "00:00" },
+            sunday: { isClosed: true, openTime: "00:00", closeTime: "00:00" },
+          },
+          agentConfig: { 
+            name: "Aria", 
+            greeting: dbBiz.prompt || "Hello, I'm an AI assistant.",
+            closing: "Thank you for your time!",
+            maxAttempts: 3,
+            delay: "immediately" as const,
+            earliestTime: "09:00",
+            latestTime: "17:00",
+            weekendCallbacks: true,
+            escalationKeywords: ["urgent", "emergency", "human", "representative"],
+            escalationContact: { name: "", phone: "", email: "" }
+          },
+          notificationConfig: {
+            emailOnEscalation: true,
+            emailAddress: "",
+            dailySummary: true,
+            smsAlerts: false,
+            smsPhone: "",
+            pushNotifications: true
+          },
+          city: "Karachi",
+          website: "hassanali.site",
+          phone: "",
+          industry: "other" as const,
+          status: "Active" as const,
         }));
 
         setBusinesses(realBusinesses);
-        
+
         if (realBusinesses.length > 0 && !selectedBusinessId) {
           setSelectedBusinessId(realBusinesses[0].id)
         }
@@ -61,7 +90,7 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
     }
-    
+
     loadBusinesses();
   }, []) // Empty dependency array to run once on mount
 
