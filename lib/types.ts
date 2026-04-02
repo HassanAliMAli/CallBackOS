@@ -117,6 +117,7 @@ export interface Business {
   phone: string
   website: string
   city: string
+  timezone: string
   status: BusinessStatus
   agentConfig: AgentConfig
   hours: OperatingHours
