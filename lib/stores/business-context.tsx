@@ -71,7 +71,7 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
             pushNotifications: true
           },
           city: "Karachi",
-          website: "hassanali.site",
+          website: dbBiz.website || "",
           phone: "",
           industry: "other" as const,
           status: "Active" as const,

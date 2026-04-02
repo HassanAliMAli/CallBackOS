@@ -72,7 +72,7 @@ export default function SimulatePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          businessId: selectedBiz,
+          businessId: selectedBiz || businesses[0]?.id || "",
           name: callerName || "Unknown Caller",
           phone: callerNumber || "+10000000000"
         })
@@ -125,7 +125,18 @@ export default function SimulatePage() {
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Business</Label>
-            <Select value={selectedBiz} onValueChange={setSelectedBiz} disabled={isRunning}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{businesses.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}</SelectContent></Select>
+            <Select
+              value={selectedBiz || businesses[0]?.id || ""}
+              onValueChange={setSelectedBiz}
+              disabled={isRunning || businesses.length === 0}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={businesses.length === 0 ? "Loading..." : "Select business"} />
+              </SelectTrigger>
+              <SelectContent>
+                {businesses.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label>Caller Number (Optional)</Label>
