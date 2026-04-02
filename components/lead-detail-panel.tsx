@@ -139,11 +139,11 @@ export function LeadDetailPanel({
           } catch(e) { /* content might be raw text */ }
         }
         if (data.activityLogs) setActivityLogs(data.activityLogs)
-        // Set mock ai Summary if missing
+        // Set default ai Summary if missing
         setAiSummary({
-            keyPoints: ["Outbound call dispatched", "AI checking availability"],
-            intentDetected: "Checking",
-            urgency: "Medium",
+            keyPoints: [],
+            intentDetected: "Pending",
+            urgency: "Low",
             recommendedAction: "Wait for call to finish"
         })
       })
