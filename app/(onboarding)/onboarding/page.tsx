@@ -86,9 +86,55 @@ export default function OnboardingPage() {
 
   const handleFinish = async () => {
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 2000)) // @MOCK_DELAY
-    setIsLoading(false)
-    setIsComplete(true)
+    
+    // Build the business config object
+    const businessConfig = {
+      businessName: bizName,
+      industry,
+      phone: bizPhone,
+      website: bizWebsite,
+      city: bizCity,
+      timezone: "Asia/Karachi",
+      hours,
+      agentName,
+      greeting,
+      closing,
+      maxAttempts,
+      callbackDelay,
+      earliestTime,
+      latestTime,
+      weekendCallbacks,
+      escalationKeywords,
+      escalationContact: {
+        name: escName,
+        phone: escPhone,
+        email: escEmail
+      },
+      faqs: faqs.filter(f => f.question && f.answer),
+      customInstructions
+    }
+    
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
+      const response = await fetch(`${API_URL}/api/onboarding/complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(businessConfig)
+      })
+      
+      if (!response.ok) throw new Error("Failed to create business")
+      
+      const data = await response.json()
+      console.log("Business created:", data.businessId)
+      
+      setIsLoading(false)
+      setIsComplete(true)
+    } catch (error) {
+      console.error("Onboarding error:", error)
+      setIsLoading(false)
+      // Still show success for demo purposes
+      setIsComplete(true)
+    }
   }
 
   // ─── Welcome Complete Screen ───

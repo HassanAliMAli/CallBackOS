@@ -16,7 +16,7 @@ import { PLAN_TIERS } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 
 export default function SettingsPage() {
-  const { user } = useAuth()
+  const { user, updateProfile } = useAuth()
   const [saving, setSaving] = useState(false)
   const [name, setName] = useState(user?.name ?? "")
   const [email, setEmail] = useState(user?.email ?? "")
@@ -28,7 +28,13 @@ export default function SettingsPage() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [inviteEmail, setInviteEmail] = useState("")
 
-  const save = async () => { setSaving(true); await new Promise(r => setTimeout(r, 1000)); setSaving(false) }
+  const save = async () => { 
+    setSaving(true)
+    // Update auth context (demo - in production this would call API)
+    updateProfile({ name, email })
+    await new Promise(r => setTimeout(r, 1000))
+    setSaving(false)
+  }
 
   const copyKey = (key: string) => { navigator.clipboard.writeText(key); setCopiedKey(key); setTimeout(() => setCopiedKey(null), 2000) }
 

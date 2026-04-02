@@ -163,6 +163,88 @@ app.get('/api/businesses', async (c) => {
   return c.json(allBusinesses);
 });
 
+// Get single business
+app.get('/api/businesses/:id', async (c) => {
+  const db = drizzle(c.env.DB);
+  const id = c.req.param('id');
+  const business = await db.select().from(businesses).where(eq(businesses.id, id)).get();
+  if (!business) {
+    return c.json({ error: "Business not found" }, 404);
+  }
+  return c.json(business);
+});
+
+// Update business
+app.put('/api/businesses/:id', async (c) => {
+  const db = drizzle(c.env.DB);
+  const id = c.req.param('id');
+  const body = await c.req.json();
+  
+  const updates: any = {};
+  if (body.name !== undefined) updates.name = body.name;
+  if (body.timezone !== undefined) updates.timezone = body.timezone;
+  if (body.prompt !== undefined) updates.prompt = body.prompt;
+  
+  await db.update(businesses).set(updates).where(eq(businesses.id, id));
+  
+  const updated = await db.select().from(businesses).where(eq(businesses.id, id)).get();
+  return c.json({ success: true, business: updated });
+});
+
+// Complete onboarding (create business with full config)
+app.post('/api/onboarding/complete', async (c) => {
+  const db = drizzle(c.env.DB);
+  const body = await c.req.json();
+  
+  const businessId = crypto.randomUUID();
+  
+  // Build the AI agent prompt from onboarding data
+  const prompt = `You are ${body.agentName || 'Aria'}, AI receptionist for ${body.businessName}.
+
+Business Details:
+- Industry: ${body.industry || 'General'}
+- Location: ${body.city || 'Unknown'}
+- Phone: ${body.phone || 'Not provided'}
+- Website: ${body.website || 'Not provided'}
+
+Operating Hours:
+${JSON.stringify(body.hours, null, 2)}
+
+Agent Configuration:
+- Greeting: ${body.greeting || 'Hello! Thank you for calling.'}
+- Closing: ${body.closing || 'Thank you for your time!'}
+- Max Callback Attempts: ${body.maxAttempts || 3}
+- Callback Delay: ${body.callbackDelay || 'immediately'}
+- Earliest Call Time: ${body.earliestTime || '9:00 AM'}
+- Latest Call Time: ${body.latestTime || '8:00 PM'}
+- Weekend Callbacks: ${body.weekendCallbacks ? 'Yes' : 'No'}
+
+Escalation Keywords: ${body.escalationKeywords?.join(', ') || 'urgent, emergency, human, representative'}
+Escalation Contact:
+- Name: ${body.escalationContact?.name || 'Not provided'}
+- Phone: ${body.escalationContact?.phone || 'Not provided'}
+- Email: ${body.escalationContact?.email || 'Not provided'}
+
+Knowledge Base FAQs:
+${(body.faqs || []).map((f: any) => `Q: ${f.question}\nA: ${f.answer}`).join('\n')}
+
+Custom Instructions:
+${body.customInstructions || 'Be helpful, professional, and concise.'}
+`;
+
+  const newBusiness = {
+    id: businessId,
+    name: body.businessName,
+    timezone: body.timezone || 'UTC',
+    prompt: prompt,
+    createdAt: new Date()
+  };
+  
+  await db.insert(businesses).values(newBusiness);
+  
+  return c.json({ success: true, business: newBusiness, businessId });
+});
+
 // Analytics overview
 app.get('/api/analytics/overview', async (c) => {
   const db = drizzle(c.env.DB);
