@@ -6,6 +6,7 @@ import { LeadProvider } from '@/lib/stores/lead-context'
 import { NotificationProvider } from '@/lib/stores/notification-context'
 import { SidebarProvider } from '@/lib/stores/sidebar-context'
 import './globals.css'
+import ElevenLabsWidget from '@/components/ElevenLabsWidget'
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,7 +49,7 @@ export default function RootLayout({
             <LeadProvider>
               <NotificationProvider>
                 <SidebarProvider>
-                  {children}         <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>         <elevenlabs-convai agent-id="agent_8701kn0wrgbcfnnvx34j0rdqc4xv"></elevenlabs-convai>
+                  {children}         <ElevenLabsWidget />         
                 </SidebarProvider>
               </NotificationProvider>
             </LeadProvider>
