@@ -49,7 +49,7 @@ export function LeadProvider({ children }: { children: ReactNode }) {
           'escalate': 'Escalate',
         };
         const status = statusMap[dbLead.status] || 'Calling';
-        
+
         return {
           id: dbLead.id,
           businessId: dbLead.businessId,

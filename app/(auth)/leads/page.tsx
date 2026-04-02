@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo } from "react"
 import { Search, Filter, Download, Eye, X, CheckSquare, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,10 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useBusinesses } from "@/lib/stores/business-context"
-import type { Lead, LeadStatus, LeadOutcome, Urgency } from "@/lib/types"
+import { useLeads } from "@/lib/stores/lead-context"
+import type { Lead, LeadStatus, LeadOutcome } from "@/lib/types"
 import { cn } from "@/lib/utils"
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://callbackos-api.hassanali205031.workers.dev"
 
 import { LeadDetailPanel } from "@/components/lead-detail-panel"
 import { EscalateModal } from "@/components/modals/escalate-modal"
@@ -42,40 +41,13 @@ function getOutcomeStyles(o: LeadOutcome): string {
 }
 
 export default function LeadsPage() {
-  const [leads, setLeads] = useState<Lead[]>([])
-  const [selectedLead, selectLead] = useState<Lead | null>(null)
-  
-  const escalateLead = (id: string) => { setLeads(prev => prev.map(l => l.id === id ? { ...l, status: "Escalate", outcome: "Needs Human" } : l)); selectLead(null) }
-  const markResolved = (id: string) => { setLeads(prev => prev.map(l => l.id === id ? { ...l, status: "Completed", outcome: "Booked" } : l)); selectLead(null) }
-
-  useEffect(() => {
-    fetch(`${API_URL}/api/leads`)
-      .then(res => res.json())
-      .then((data: any[]) => {
-        const mapped: Lead[] = data.map(d => ({
-          id: d.id,
-          businessId: d.businessId,
-          businessName: "Acme Corp", // Derived from business ID ideally
-          callerName: d.name,
-          callerNumber: d.phone,
-          status: (d.status.charAt(0).toUpperCase() + d.status.slice(1)) as LeadStatus,
-          outcome: (d.status === 'completed' ? 'Booked' : (d.status === 'escalate' ? 'Needs Human' : 'Qualified')) as LeadOutcome,
-          missedAt: new Date(d.createdAt),
-          callbackInitiatedAt: null,
-          transcript: null,
-          duration: null,
-          callbackAttempt: 1,
-          maxAttempts: 3,
-          callbackNumber: null,
-          notes: [],
-          aiSummary: null,
-          activityLog: []
-        }))
-        setLeads(mapped.sort((a,b) => b.missedAt.getTime() - a.missedAt.getTime()))
-      })
-      .catch(e => console.error(e))
-  }, [])
+  const { leads, updateLead } = useLeads()
   const { businesses } = useBusinesses()
+  const [selectedLead, selectLead] = useState<Lead | null>(null)
+
+  const escalateLead = (id: string) => { updateLead(id, { status: "Escalate", outcome: "Needs Human" }); selectLead(null) }
+  const markResolved = (id: string) => { updateLead(id, { status: "Completed", outcome: "Booked" }); selectLead(null) }
+
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [businessFilter, setBusinessFilter] = useState("all")

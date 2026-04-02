@@ -24,7 +24,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://callbackos-api.hassa
 
 export default function SimulatePage() {
   const { businesses } = useBusinesses()
-  const [selectedBiz, setSelectedBiz] = useState(businesses[0]?.id ?? "")
+  const [selectedBiz, setSelectedBiz] = useState("")
   const [callerName, setCallerName] = useState("John Doe")
   const [callerNumber, setCallerNumber] = useState("+92 300 111 9999")
   const [callReason, setCallReason] = useState("Missed call regarding an appointment booking.")
@@ -34,6 +34,13 @@ export default function SimulatePage() {
   const [elapsedTime, setElapsedTime] = useState(0)
   const chatRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Update selectedBiz when businesses load
+  useEffect(() => {
+    if (businesses.length > 0 && !selectedBiz) {
+      setSelectedBiz(businesses[0].id)
+    }
+  }, [businesses])
 
   const biz = businesses.find(b => b.id === selectedBiz)
   const isRunning = simStep !== "idle" && simStep !== "completed"
