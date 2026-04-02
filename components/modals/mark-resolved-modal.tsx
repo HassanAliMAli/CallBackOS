@@ -19,14 +19,23 @@ interface MarkResolvedModalProps {
 export function MarkResolvedModal({ open, onClose, leadId, callerNumber }: MarkResolvedModalProps) {
   const [outcome, setOutcome] = useState<LeadOutcome | "">("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const API_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
 
   const handleResolve = async () => {
     if (!outcome) return
     setIsSubmitting(true)
-    // TODO: Call PUT /api/leads/:id/resolve with outcome
-    await new Promise(r => setTimeout(r, 800))
-    setIsSubmitting(false)
-    onClose()
+    try {
+      await fetch(`${API_URL}/api/leads/${leadId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "completed", outcome })
+      })
+    } catch (error) {
+      console.error("Failed to resolve lead", error)
+    } finally {
+      setIsSubmitting(false)
+      onClose()
+    }
   }
 
   return (

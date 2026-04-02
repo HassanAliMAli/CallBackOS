@@ -15,13 +15,22 @@ interface EscalateModalProps {
 
 export function EscalateModal({ open, onClose, leadId, callerNumber }: EscalateModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const API_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
 
   const handleEscalate = async () => {
     setIsSubmitting(true)
-    // TODO: Call PUT /api/leads/:id/escalate
-    await new Promise(r => setTimeout(r, 800))
-    setIsSubmitting(false)
-    onClose()
+    try {
+      await fetch(`${API_URL}/api/leads/${leadId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "escalate", outcome: "Needs Human" })
+      })
+    } catch (error) {
+      console.error("Failed to escalate lead", error)
+    } finally {
+      setIsSubmitting(false)
+      onClose()
+    }
   }
 
   return (

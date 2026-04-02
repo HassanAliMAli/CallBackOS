@@ -31,11 +31,25 @@ export default function BusinessSettingsPage() {
 
   if (!biz) return <div className="text-center py-20 text-muted-foreground">Business not found</div>
 
-  const save = async () => { 
+  const API_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
+
+  const save = async () => {
     setSaving(true)
-    // TODO: Call PUT /api/businesses/:id to persist changes to D1
-    await new Promise(r => setTimeout(r, 1000))
-    setSaving(false)
+    try {
+      await fetch(`${API_URL}/api/businesses/${biz.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: biz.name,
+          timezone: biz.timezone,
+          prompt: biz.agentConfig?.greeting
+        })
+      })
+    } catch (error) {
+      console.error("Failed to save business", error)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const updateDay = (day: keyof OperatingHours, field: keyof DaySchedule, value: string | boolean) => {

@@ -17,16 +17,23 @@ interface DeleteBusinessModalProps {
 export function DeleteBusinessModal({ open, onClose, businessName }: DeleteBusinessModalProps) {
   const [confirmation, setConfirmation] = useState("")
   const [isDeleting, setIsDeleting] = useState(false)
+  const API_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
 
   const isMatch = confirmation === businessName
 
   const handleDelete = async () => {
     if (!isMatch) return
     setIsDeleting(true)
-    // TODO: Call DELETE /api/businesses/:id
-    await new Promise(r => setTimeout(r, 1000))
-    setIsDeleting(false)
-    onClose()
+    try {
+      // TODO: Get business ID from props and call DELETE /api/businesses/:id
+      // For now, just close the modal
+      await new Promise(r => setTimeout(r, 1000))
+    } catch (error) {
+      console.error("Failed to delete business", error)
+    } finally {
+      setIsDeleting(false)
+      onClose()
+    }
   }
 
   return (

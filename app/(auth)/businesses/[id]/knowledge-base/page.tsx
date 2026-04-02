@@ -44,11 +44,23 @@ export default function KnowledgeBasePage() {
   const addFaq = () => setFaqs(prev => [...prev, { id: `faq_new_${Date.now()}`, question: "", answer: "", businessId: params.id as string }])
   const removeFaq = (id: string) => setFaqs(prev => prev.filter(f => f.id !== id))
   const updateFaq = (id: string, field: "question" | "answer", value: string) => setFaqs(prev => prev.map(f => f.id === id ? { ...f, [field]: value } : f))
+  
+  const API_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
+  
   const save = async () => { 
     setSaving(true)
-    // TODO: Call API to save FAQs and custom instructions to D1
-    await new Promise(r => setTimeout(r, 1000))
-    setSaving(false)
+    try {
+      // Save FAQs to API
+      await fetch(`${API_URL}/api/businesses/${params.id}/faqs`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ faqs })
+      })
+    } catch (error) {
+      console.error("Failed to save FAQs", error)
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (!biz) return <div className="text-center py-20 text-muted-foreground">Business not found</div>

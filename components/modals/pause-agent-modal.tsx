@@ -17,10 +17,12 @@ interface PauseAgentModalProps {
 export function PauseAgentModal({ open, onClose, businessName }: PauseAgentModalProps) {
   const [duration, setDuration] = useState("until-manual")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const API_URL = process.env.NEXT_PUBLIC_WORKER_URL || "https://callbackos-api.hassanali205031.workers.dev"
 
   const handlePause = async () => {
     setIsSubmitting(true)
-    // TODO: Call PUT /api/businesses/:id/pause with duration
+    // TODO: Implement business pause/resume in D1
+    // For now, just close the modal
     await new Promise(r => setTimeout(r, 800))
     setIsSubmitting(false)
     onClose()

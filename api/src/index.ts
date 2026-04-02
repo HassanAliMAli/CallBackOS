@@ -281,21 +281,115 @@ app.get('/api/leads', async (c) => {
 app.get('/api/leads/:id', async (c) => {
   const db = drizzle(c.env.DB);
   const leadId = c.req.param('id');
-  
+
   const lead = await db.select().from(leads).where(eq(leads.id, leadId)).get();
-  
+
   if (!lead) {
      return c.json({ error: "Lead not found" }, 404);
   }
 
   const transcriptList = await db.select().from(transcripts).where(eq(transcripts.leadId, leadId));
   const logs = await db.select().from(activityLogs).where(eq(activityLogs.leadId, leadId));
-  
+
   return c.json({
     lead,
     transcripts: transcriptList,
     activityLogs: logs
   });
+});
+
+// 5. Update lead status (escalate/resolve)
+app.put('/api/leads/:id', async (c) => {
+  const db = drizzle(c.env.DB);
+  const leadId = c.req.param('id');
+  const body = await c.req.json();
+  
+  const updates: any = {};
+  if (body.status) updates.status = body.status;
+  if (body.outcome) updates.outcome = body.outcome;
+  
+  await db.update(leads).set(updates).where(eq(leads.id, leadId));
+  
+  // Log activity
+  if (body.status === 'escalate') {
+    await db.insert(activityLogs).values({
+      id: crypto.randomUUID(),
+      leadId,
+      type: 'escalation_triggered',
+      details: 'Lead escalated to human',
+      createdAt: new Date()
+    });
+  }
+  
+  const updated = await db.select().from(leads).where(eq(leads.id, leadId)).get();
+  return c.json({ success: true, lead: updated });
+});
+
+// 6. Delete lead
+app.delete('/api/leads/:id', async (c) => {
+  const db = drizzle(c.env.DB);
+  const leadId = c.req.param('id');
+  
+  await db.delete(leads).where(eq(leads.id, leadId));
+  await db.delete(transcripts).where(eq(transcripts.leadId, leadId));
+  await db.delete(activityLogs).where(eq(activityLogs.leadId, leadId));
+  
+  return c.json({ success: true });
+});
+
+// 7. Delete business
+app.delete('/api/businesses/:id', async (c) => {
+  const db = drizzle(c.env.DB);
+  const businessId = c.req.param('id');
+  
+  // Delete all related leads first
+  const businessLeads = await db.select({ id: leads.id }).from(leads).where(eq(leads.businessId, businessId));
+  for (const lead of businessLeads) {
+    await db.delete(transcripts).where(eq(transcripts.leadId, lead.id));
+    await db.delete(activityLogs).where(eq(activityLogs.leadId, lead.id));
+  }
+  await db.delete(leads).where(eq(leads.businessId, businessId));
+  
+  // Delete business
+  await db.delete(businesses).where(eq(businesses.id, businessId));
+  
+  return c.json({ success: true });
+});
+
+// 8. Update business status (pause/resume)
+app.put('/api/businesses/:id/status', async (c) => {
+  const db = drizzle(c.env.DB);
+  const businessId = c.req.param('id');
+  const body = await c.req.json();
+  
+  const updates: any = {};
+  if (body.status) updates.status = body.status;
+  
+  await db.update(businesses).set(updates).where(eq(businesses.id, businessId));
+  
+  const updated = await db.select().from(businesses).where(eq(businesses.id, businessId)).get();
+  return c.json({ success: true, business: updated });
+});
+
+// 9. Save business FAQs (stored in prompt)
+app.put('/api/businesses/:id/faqs', async (c) => {
+  const db = drizzle(c.env.DB);
+  const businessId = c.req.param('id');
+  const body = await c.req.json();
+  
+  // Get existing business
+  const business = await db.select().from(businesses).where(eq(businesses.id, businessId)).get();
+  if (!business) {
+    return c.json({ error: "Business not found" }, 404);
+  }
+  
+  // Update prompt with new FAQs
+  const faqsText = (body.faqs || []).map((f: any) => `Q: ${f.question}\nA: ${f.answer}`).join('\n');
+  const newPrompt = business.prompt + '\n\nUpdated FAQs:\n' + faqsText;
+  
+  await db.update(businesses).set({ prompt: newPrompt }).where(eq(businesses.id, businessId));
+  
+  return c.json({ success: true });
 });
 
 // 5. Connect to Websocket for a lead (Real-time tracking)
