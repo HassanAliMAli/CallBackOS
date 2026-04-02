@@ -207,15 +207,22 @@ export default function SimulatePage() {
       {simStep === "completed" && (
         <div className="rounded-lg border border-border bg-card p-5 space-y-4 animate-slide-up-fade">
           <h3 className="text-sm font-semibold flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" />AI Summary</h3>
-          <ul className="space-y-1.5">
-            <li className="flex items-start gap-2 text-sm"><span className="w-1 h-1 mt-2 rounded-full bg-primary shrink-0" />Caller wanted to book a dental cleaning appointment</li>
-            <li className="flex items-start gap-2 text-sm"><span className="w-1 h-1 mt-2 rounded-full bg-primary shrink-0" />Appointment booked for Thursday at 2:00 PM</li>
-            <li className="flex items-start gap-2 text-sm"><span className="w-1 h-1 mt-2 rounded-full bg-primary shrink-0" />Caller was satisfied with the interaction</li>
-          </ul>
+          <p className="text-sm text-muted-foreground">
+            Call dispatched successfully. Check the <strong>Leads dashboard</strong> for the live transcript and AI-generated summary once the call completes.
+          </p>
           <div className="grid sm:grid-cols-3 gap-2 pt-2">
-            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/50"><Target className="w-4 h-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Intent</p><p className="text-sm font-medium">Book Appointment</p></div></div>
-            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/50"><Gauge className="w-4 h-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Urgency</p><Badge variant="secondary" className="text-xs bg-status-calling/15 text-status-calling">Medium</Badge></div></div>
-            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/50"><Lightbulb className="w-4 h-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Outcome</p><Badge variant="secondary" className="text-xs bg-status-completed/15 text-status-completed">Booked</Badge></div></div>
+            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/50">
+              <Target className="w-4 h-4 text-muted-foreground" />
+              <div><p className="text-xs text-muted-foreground">Status</p><p className="text-sm font-medium">Dispatched</p></div>
+            </div>
+            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/50">
+              <Gauge className="w-4 h-4 text-muted-foreground" />
+              <div><p className="text-xs text-muted-foreground">Business</p><p className="text-sm font-medium">{biz?.name || "—"}</p></div>
+            </div>
+            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/50">
+              <Lightbulb className="w-4 h-4 text-muted-foreground" />
+              <div><p className="text-xs text-muted-foreground">Caller</p><p className="text-sm font-medium">{callerName || callerNumber}</p></div>
+            </div>
           </div>
         </div>
       )}

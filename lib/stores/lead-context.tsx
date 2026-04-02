@@ -43,12 +43,13 @@ export function LeadProvider({ children }: { children: ReactNode }) {
       const normalizedLeads: Lead[] = data.map((dbLead: any) => {
         // Capitalize status
         const statusMap: Record<string, LeadStatus> = {
+          'queued': 'Queued',
           'calling': 'Calling',
           'completed': 'Completed',
           'failed': 'Failed',
           'escalate': 'Escalate',
         };
-        const status = statusMap[dbLead.status] || 'Calling';
+        const status = statusMap[dbLead.status] || 'Queued';
 
         return {
           id: dbLead.id,
@@ -57,7 +58,7 @@ export function LeadProvider({ children }: { children: ReactNode }) {
           callerNumber: dbLead.phone,
           callerName: dbLead.name || undefined,
           status: status as LeadStatus,
-          outcome: "Pending", // Default
+          outcome: undefined,
           missedAt: new Date(dbLead.createdAt),
           callbackInitiatedAt: null,
           transcript: null,
